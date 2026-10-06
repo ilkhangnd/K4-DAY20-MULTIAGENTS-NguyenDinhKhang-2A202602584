@@ -9,7 +9,7 @@
 - Mô hình (tên deployment hoặc `LAB_MODEL`), nhiệt độ (`LAB_TEMPERATURE`), `recursion_limit`: `openai:gpt-4.1-mini`, `0`, `60`.
 - Phiên bản Deep Agents (`pip show deepagents`), hệ điều hành, chạy trực tiếp hay trong Docker: `deepagents 0.7.21`; macOS Darwin 27.2.0 arm64; chạy trực tiếp trong `.venv`.
 - Số lần chạy tác vụ đã dùng / ngân sách: 21 lượt có artifact: baseline 6, subagents 6, skills-auto 3 lượt phát triển + 6 lượt chính thức; ngân sách API không được cung cấp.
-- Commit của tag `freeze`: `80add9e` (`freeze skills`).
+- Commit của tag `freeze`: sẽ được cập nhật sau khi chốt thí nghiệm V2.
 
 ### Quy trình thí nghiệm và minh chứng
 
@@ -27,9 +27,9 @@ Repository không có ảnh chụp màn hình nguồn; minh chứng tái lập �
 
 ## 2. Giả thuyết (commit TRƯỚC tag `freeze`, Phần 4.0)
 
-- H1 (subagents so với baseline): Dự đoán `subagents` không tăng điểm trung bình trên evaluation so với `baseline`, nhưng tăng token. Ở task học, nó đạt 8/27 so với 13/27 của baseline và dùng 126,769 so với 103,304 token; chỉ một trong ba task có lời gọi subagent, nên chi phí điều phối chưa tạo được lợi ích nhất quán.
-- H2 (skills-auto so với baseline): Dự đoán `skills-auto` không cải thiện đáng kể evaluation so với `baseline`. Trên task học, hai điều kiện đều đạt 13/27, trong khi cả ba lượt `skills-auto` đều có `skills_read = 0`; vì vậy skill được nạp nhưng chưa có bằng chứng là đã đi vào ngữ cảnh thực thi. Điều này phù hợp với lưu ý trong GUIDE rằng skill tự sinh có thể không chuyển giao sang tác vụ mới.
-- H3 (tác vụ học so với tác vụ đánh giá): Dự đoán điểm evaluation có thể khác và có độ dao động lớn so với task học, vì mỗi task/cấu hình chỉ chạy một lần và evaluation chứa những yêu cầu mới. Do đó không suy diễn hiệu quả tổng quát chỉ từ điểm học; sẽ tách check kỹ thuật và check quy ước trong phân tích sau freeze.
+- H1 (subagents so với baseline): Dự đoán `subagents` không vượt `baseline` một cách nhất quán ở evaluation. Ở lần học V2, cả hai điều kiện cùng đạt 8/27; `subagents` có hai lời gọi subagent nhưng không tạo thêm check đạt. Vì vậy chi phí điều phối có thể tăng mà chưa chắc tăng chất lượng.
+- H2 (skills-auto so với baseline): Dự đoán `skills-auto` sẽ cải thiện các check quy ước của họ code, data và logs so với `baseline`, nhưng dùng nhiều token hơn. Khác với V1, ba skill V2 được curator sinh có checklist hành động và lần phát triển `code-learn` đã đọc đủ 3 skill, đạt 9/10 (so với baseline 7/10), trong đó regression test và changelog đều đạt. Đây là dự đoán trước khi chạy evaluation sau freeze, không phải kết luận về evaluation.
+- H3 (tác vụ học so với tác vụ đánh giá): Dự đoán điểm evaluation có thể thấp hơn hoặc dao động so với task học vì evaluation chứa dữ liệu và quy ước mới, đồng thời mỗi tổ hợp chỉ chạy một lần. Do đó sẽ tách check kỹ thuật/quy ước và không suy diễn khả năng tổng quát chỉ từ task học.
 
 ## 3. Làm quen Deep Agents (Phần 0.3)
 
