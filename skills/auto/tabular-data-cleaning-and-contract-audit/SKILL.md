@@ -1,15 +1,16 @@
 ---
 name: tabular-data-cleaning-and-contract-audit
-description: Use this at the start and before completing any tabular data task to clean, normalize, and produce required output files with metadata and schema.
+description: Use this skill at the start and before completing any tabular data processing task to normalize, clean, and produce contract-compliant CSV and JSON outputs.
 ---
-- At start: Load input CSV with proper parsing of dates and string trimming.
-- At start: Normalize categorical fields to canonical spellings (e.g., capitalize region names).
-- At start: Remove duplicate rows.
-- At start: Identify and handle missing or sentinel values (e.g., amount == -999).
-- Before completion: Write workspace/clean.csv with header order_id,timestamp_utc,region,amount_cents.
-- Before completion: Format timestamp_utc as ISO 8601 UTC (YYYY-MM-DDTHH:MM:SSZ).
-- Before completion: Convert amount to integer cents.
-- Before completion: Ensure region uses canonical spelling (North, South, East, West).
-- Before completion: Include one row per distinct order with known amount.
-- Before completion: Create or update metadata block describing output schema and companion files if applicable.
-- Before completion: Save output JSON answer files with quoted keys and valid JSON syntax.
+- At start, read input CSV and data dictionary to understand columns and formats.
+- Normalize all categorical fields to canonical spelling and capitalization (e.g., region names).
+- Parse all date/time fields into consistent UTC ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ).
+- Remove duplicate rows based on unique keys (e.g., order_id), counting duplicates removed.
+- Convert all monetary values to integer cents (multiply by 100 and convert to int).
+- Exclude or mark rows with missing or invalid values as specified (e.g., amount = -999).
+- Write cleaned CSV to workspace/clean.csv with exact header order and required columns.
+- Create or update answer.json with required metrics and a meta object containing:
+  - source: input filename
+  - rows_in: total input rows including duplicates
+  - rows_used: distinct rows with known amounts
+- Before completion, audit output schema, metadata presence, normalized values, and companion files; create or fix any missing or incorrect items.

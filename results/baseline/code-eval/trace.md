@@ -100,7 +100,7 @@ def parse_duration(text):
     return int(m.group(1)) * 60 + int(m.group(2))
 
 ### Tool call: edit_file
-{"file_path": "/workspace/bookings/billing.py", "old_string": "    return round(minutes / block)", "new_string": "    if minutes < 0:\n        raise ValueError(\"minutes must be >= 0\")\n    # round UP to the next block\n    return (minutes + block - 1) // block"}
+{"file_path": "/workspace/bookings/billing.py", "old_string": "    return round(minutes / block)", "new_string": "    if minutes < 0:\n        raise ValueError(\"minutes must be >= 0\")\n    # round UP to the nearest block\n    return (minutes + block - 1) // block"}
 
 ### Tool result
 Successfully replaced 1 instance(s) of the string in '/workspace/bookings/billing.py'
@@ -112,16 +112,83 @@ Successfully replaced 1 instance(s) of the string in '/workspace/bookings/billin
 Successfully replaced 1 instance(s) of the string in '/workspace/bookings/schedule.py'
 
 ### Tool call: edit_file
-{"file_path": "/workspace/bookings/timeutil.py", "old_string": "    m = re.fullmatch(r\"(\\d+)h(\\d+)m\", text.strip())\n    if not m:\n        raise ValueError(f\"bad duration: {text!r}\")\n    return int(m.group(1)) * 60 + int(m.group(2))", "new_string": "    text = text.strip()\n    m = re.fullmatch(r\"(\\d+)h(\\d+)m\", text)\n    if m:\n        return int(m.group(1)) * 60 + int(m.group(2))\n    m = re.fullmatch(r\"(\\d+)h\", text)\n    if m:\n        return int(m.group(1)) * 60\n    m = re.fullmatch(r\"(\\d+)m\", text)\n    if m:\n        return int(m.group(1))\n    m = re.fullmatch(r\"(\\d+):(\\d+)\", text)\n    if m:\n        return int(m.group(1)) * 60 + int(m.group(2))\n    m = re.fullmatch(r\"(\\d+)\", text)\n    if m:\n        return int(m.group(1))\n    raise ValueError(f\"bad duration: {text!r}\")"}
+{"file_path": "/workspace/bookings/timeutil.py", "old_string": "    m = re.fullmatch(r\"(\\d+)h(\\d+)m\", text.strip())\n    if not m:\n        raise ValueError(f\"bad duration: {text!r}\")\n    return int(m.group(1)) * 60 + int(m.group(2))", "new_string": "    text = text.strip()\n    m = re.fullmatch(r\"(\\d+)h(\\d+)m\", text)\n    if m:\n        return int(m.group(1)) * 60 + int(m.group(2))\n    m = re.fullmatch(r\"(\\d+)h\", text)\n    if m:\n        return int(m.group(1)) * 60\n    m = re.fullmatch(r\"(\\d+)m\", text)\n    if m:\n        return int(m.group(1))\n    m = re.fullmatch(r\"(\\d+):(\\d{2})\", text)\n    if m:\n        return int(m.group(1)) * 60 + int(m.group(2))\n    m = re.fullmatch(r\"(\\d+)\", text)\n    if m:\n        return int(m.group(1))\n    raise ValueError(f\"bad duration: {text!r}\")"}
 
 ### Tool result
 Successfully replaced 1 instance(s) of the string in '/workspace/bookings/timeutil.py'
 
+### Tool call: read_file
+{"file_path": "/workspace/tests/test_billing.py"}
+
+### Tool result
+Error: File '/workspace/tests/test_billing.py' not found
+
+### Tool call: ls
+{"path": "/workspace/tests"}
+
+### Tool result
+['/workspace/tests/__pycache__/', '/workspace/tests/test_bookings.py']
+
+### Tool call: read_file
+{"file_path": "/workspace/tests/test_bookings.py", "limit": 40}
+
+### Tool result
+@@ lines 1-15 of 15 @@
+from bookings.billing import billable_blocks
+from bookings.schedule import add_slot, total_minutes
+
+
+def test_total_minutes_mixed_formats():
+    assert total_minutes(["1h30m", "2h"]) == 210
+
+
+def test_billable_blocks_rounds_up():
+    assert billable_blocks(20) == 2
+    assert billable_blocks(45) == 3
+
+
+def test_add_slot_single_call():
+    assert add_slot("a") == ["a"]
+
+### Tool call: execute
+{"command": "pytest --maxfail=1 --disable-warnings -q"}
+
+### Tool result
+
+==================================== ERRORS ====================================
+______________ ERROR collecting workspace/tests/test_bookings.py _______________
+ImportError while importing test module '/private/var/folders/m6/nvyncr195t58jwsp2kyvx2rr0000gn/T/lab-deepagents-vvbae0qu/workspace/tests/test_bookings.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~/AITHUCCHIEN/K4-DAY20-MULTIAGENTS-NguyenDinhKhang-2A202602584/tasks/code-eval/workspace/tests/test_bookings.py:1: in <module>
+    from bookings.billing import billable_blocks
+E   ModuleNotFoundError: No module named 'bookings'
+=========================== short test summary info ============================
+ERROR workspace/tests/test_bookings.py
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+1 error in 0.05s
+
+Exit code: 2
+[Command failed with exit code 2]
+
+### Tool call: execute
+{"command": "PYTHONPATH=workspace pytest --maxfail=1 --disable-warnings -q"}
+
+### Tool result
+...                                                                      [100%]
+3 passed in 0.01s
+
+[Command succeeded with exit code 0]
+
 ### Assistant
-I fixed the following issues in the source code to make the test suite pass and to meet the docstring specifications:
+I fixed three issues in the source code:
 
-- In bookings/billing.py, I changed the billable_blocks function to raise a ValueError if minutes is negative and to always round up partial blocks instead of using round().
-- In bookings/schedule.py, I fixed the add_slot function to avoid using a mutable default argument. It now uses None as the default and creates a new list inside the function, ensuring separate calls do not share state.
-- In bookings/timeutil.py, I fixed the parse_duration function to support all the documented formats (e.g., "1h30m", "2h", "45m", "1:30", "45") and to raise ValueError only if none match.
+1. In bookings/billing.py, I fixed billable_blocks to raise ValueError for negative minutes and to round up correctly to the nearest block.
+2. In bookings/schedule.py, I fixed add_slot to avoid using a mutable default argument, so separate calls do not share state.
+3. In bookings/timeutil.py, I fixed parse_duration to support all the documented formats and raise ValueError only for unsupported formats.
 
-These changes align the code with the specifications in the docstrings and should make all tests pass.
+After these fixes, all tests pass.
