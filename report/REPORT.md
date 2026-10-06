@@ -11,6 +11,20 @@
 - Số lần chạy tác vụ đã dùng / ngân sách: 21 lượt có artifact: baseline 6, subagents 6, skills-auto 3 lượt phát triển + 6 lượt chính thức; ngân sách API không được cung cấp.
 - Commit của tag `freeze`: `80add9e` (`freeze skills`).
 
+### Quy trình thí nghiệm và minh chứng
+
+```mermaid
+flowchart LR
+    A[Baseline: task học] --> B[Curator sinh skill]
+    B --> C[Skills-auto: task học]
+    C --> D[Commit giả thuyết]
+    D --> E[Tag freeze]
+    E --> F[Chạy evaluation của 3 điều kiện]
+    F --> G[So sánh, kiểm tra freeze, báo cáo]
+```
+
+Repository không có ảnh chụp màn hình nguồn; minh chứng tái lập được là các artifact máy sinh. Các điểm đối chiếu chính gồm [bản ghi baseline data-learn](../results/baseline/data-learn/run.json), [vết subagent data-learn](../results/subagents/data-learn/trace.md), [bản ghi skills-auto code-eval](../results/skills-auto/code-eval/run.json), [lần chạy skills-auto trước freeze](../results/skills-auto-dev/code-learn/run.json) và [bảng tổng hợp được sinh lại](table.md).
+
 ## 2. Giả thuyết (commit TRƯỚC tag `freeze`, Phần 4.0)
 
 - H1 (subagents so với baseline): Dự đoán `subagents` không tăng điểm trung bình trên evaluation so với `baseline`, nhưng tăng token. Ở task học, nó đạt 8/27 so với 13/27 của baseline và dùng 126,769 so với 103,304 token; chỉ một trong ba task có lời gọi subagent, nên chi phí điều phối chưa tạo được lợi ích nhất quán.
