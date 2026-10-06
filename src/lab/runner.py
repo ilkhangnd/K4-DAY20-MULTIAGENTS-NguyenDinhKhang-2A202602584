@@ -100,8 +100,16 @@ def run_task(task_id: str, condition: str, results_dir="results", model=None, re
                 use_skills=skills_dir is not None,
                 model=model,
             )
+            instruction = task.instruction
+            if skills_dir is not None:
+                instruction += (
+                    "\n\nMANDATORY SKILL ACTIVATION: before reading or changing workspace files, use read_file "
+                    "to read every available skills/*/SKILL.md. Every applicable checklist item is an acceptance "
+                    "criterion, not a suggestion: implement it even when visible tests already pass. Before your "
+                    "final response, verify every applicable checklist item and create every required artifact."
+                )
             result = agent.invoke(
-                {"messages": [{"role": "user", "content": task.instruction}]},
+                {"messages": [{"role": "user", "content": instruction}]},
                 config={"callbacks": [usage], "recursion_limit": recursion_limit},
             )
             messages = result.get("messages", [])

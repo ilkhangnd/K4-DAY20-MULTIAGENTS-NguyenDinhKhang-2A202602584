@@ -111,6 +111,8 @@ Rules:
 - The code skill must include a final contract audit for documentation, tests, public-function annotations, and change records when present.
 - The tabular-data skill must include a final contract audit for output schema, metadata, normalized values, and required companion files when present.
 - The log skill must include a final contract audit for JSON schema, metadata, normalized fields, ordering, and aggregate counts when present.
+- Use direct, executable imperatives: if a required artifact or convention is absent, tell the agent to create or update it, rather than merely inspect or verify it.  A final audit must include the action that fixes a failed audit item.
+- Preserve organization-wide filenames, headings, field names, and formats explicitly stated in failed RULE feedback when they are needed to create a required artifact; do not retain incidental input-data filenames, function names, task IDs, answers, or evaluation material.
 - Each skill needs YAML frontmatter with a lower-case hyphenated name and a one-sentence description saying when to use it.
 - Keep each imperative checklist under 15 lines and prefer verification steps over long procedural explanations.
 - Output every skill exactly in this format:
