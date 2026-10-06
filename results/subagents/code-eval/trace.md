@@ -99,17 +99,44 @@ def parse_duration(text):
         raise ValueError(f"bad duration: {text!r}")
     return int(m.group(1)) * 60 + int(m.group(2))
 
+### Tool call: read_file
+{"file_path": "/workspace/tests/test_billing.py"}
+
+### Tool result
+Error: File '/workspace/tests/test_billing.py' not found
+
+### Tool call: ls
+{"path": "/workspace/tests"}
+
+### Tool result
+['/workspace/tests/__pycache__/', '/workspace/tests/test_bookings.py']
+
+### Tool call: read_file
+{"file_path": "/workspace/tests/test_bookings.py", "limit": 40}
+
+### Tool result
+@@ lines 1-15 of 15 @@
+from bookings.billing import billable_blocks
+from bookings.schedule import add_slot, total_minutes
+
+
+def test_total_minutes_mixed_formats():
+    assert total_minutes(["1h30m", "2h"]) == 210
+
+
+def test_billable_blocks_rounds_up():
+    assert billable_blocks(20) == 2
+    assert billable_blocks(45) == 3
+
+
+def test_add_slot_single_call():
+    assert add_slot("a") == ["a"]
+
 ### Tool call: edit_file
-{"file_path": "/workspace/bookings/billing.py", "old_string": "return round(minutes / block)", "new_string": "if minutes < 0:\n        raise ValueError(\"minutes must be >= 0\")\n    # round UP to the nearest block\n    return (minutes + block - 1) // block"}
+{"file_path": "/workspace/bookings/billing.py", "old_string": "return round(minutes / block)", "new_string": "if minutes < 0:\n        raise ValueError(\"minutes must be >= 0\")\n    return (minutes + block - 1) // block"}
 
 ### Tool result
 Successfully replaced 1 instance(s) of the string in '/workspace/bookings/billing.py'
-
-### Tool call: edit_file
-{"file_path": "/workspace/bookings/schedule.py", "old_string": "def add_slot(slot, slots=[]):\n    \"\"\"Return a NEW list containing the given slots plus `slot`.\n\n    Separate calls must not share state: calling add_slot(\"a\") and then\n    add_slot(\"b\") returns [\"a\"] and then [\"b\"].\n    \"\"\"\n    slots.append(slot)\n    return slots", "new_string": "def add_slot(slot, slots=None):\n    \"\"\"Return a NEW list containing the given slots plus `slot`.\n\n    Separate calls must not share state: calling add_slot(\"a\") and then\n    add_slot(\"b\") returns [\"a\"] and then [\"b\"].\n    \"\"\"\n    if slots is None:\n        slots = []\n    slots.append(slot)\n    return slots"}
-
-### Tool result
-Successfully replaced 1 instance(s) of the string in '/workspace/bookings/schedule.py'
 
 ### Tool call: edit_file
 {"file_path": "/workspace/bookings/timeutil.py", "old_string": "m = re.fullmatch(r\"(\\d+)h(\\d+)m\", text.strip())\n    if not m:\n        raise ValueError(f\"bad duration: {text!r}\")\n    return int(m.group(1)) * 60 + int(m.group(2))", "new_string": "text = text.strip()\n    m = re.fullmatch(r\"(\\d+)h(\\d+)m\", text)\n    if m:\n        return int(m.group(1)) * 60 + int(m.group(2))\n    m = re.fullmatch(r\"(\\d+)h\", text)\n    if m:\n        return int(m.group(1)) * 60\n    m = re.fullmatch(r\"(\\d+)m\", text)\n    if m:\n        return int(m.group(1))\n    m = re.fullmatch(r\"(\\d+):(\\d+)\", text)\n    if m:\n        return int(m.group(1)) * 60 + int(m.group(2))\n    m = re.fullmatch(r\"(\\d+)\", text)\n    if m:\n        return int(m.group(1))\n    raise ValueError(f\"bad duration: {text!r}\")"}
@@ -117,11 +144,17 @@ Successfully replaced 1 instance(s) of the string in '/workspace/bookings/schedu
 ### Tool result
 Successfully replaced 1 instance(s) of the string in '/workspace/bookings/timeutil.py'
 
+### Tool call: edit_file
+{"file_path": "/workspace/bookings/schedule.py", "old_string": "def add_slot(slot, slots=[]):\n    \"\"\"Return a NEW list containing the given slots plus `slot`.\n\n    Separate calls must not share state: calling add_slot(\"a\") and then\n    add_slot(\"b\") returns [\"a\"] and then [\"b\"].\n    \"\"\"\n    slots.append(slot)\n    return slots", "new_string": "def add_slot(slot, slots=None):\n    \"\"\"Return a NEW list containing the given slots plus `slot`.\n\n    Separate calls must not share state: calling add_slot(\"a\") and then\n    add_slot(\"b\") returns [\"a\"] and then [\"b\"].\n    \"\"\"\n    if slots is None:\n        slots = []\n    slots.append(slot)\n    return slots"}
+
+### Tool result
+Successfully replaced 1 instance(s) of the string in '/workspace/bookings/schedule.py'
+
 ### Assistant
 I fixed the following issues in the source code to make the test suite pass and ensure the functions behave as their docstrings specify:
 
-- In bookings/billing.py, I changed the billable_blocks function to raise a ValueError if minutes is negative and to always round up the number of blocks instead of using round().
-- In bookings/schedule.py, I fixed the add_slot function to avoid using a mutable default argument. It now uses None as the default and creates a new list inside the function, ensuring separate calls do not share state.
-- In bookings/timeutil.py, I fixed the parse_duration function to support all the documented formats: "1h30m", "2h", "45m", "1:30", and bare numbers. It now tries each pattern in turn and raises ValueError only if none match.
+- In bookings/billing.py, I fixed billable_blocks to raise ValueError on negative minutes and to always round up partial blocks correctly.
+- In bookings/timeutil.py, I fixed parse_duration to support all documented formats (e.g., "1h", "45m", "1:30", bare numbers) and to raise ValueError on bad input.
+- In bookings/schedule.py, I fixed add_slot to not use a mutable default argument, so separate calls do not share state, returning a new list each time.
 
-These changes align the code with the specifications in the docstrings and should make all tests pass.
+No changes were made to tests or other files.
