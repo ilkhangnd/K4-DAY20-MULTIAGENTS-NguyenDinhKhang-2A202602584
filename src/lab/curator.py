@@ -106,8 +106,13 @@ Below are failed checks, grader feedback, and execution traces from learning tas
 
 Rules:
 - Do not mention task IDs, task-specific file names, answers, or numbers from the evidence.
+- Write exactly three complementary skills when the evidence supports code, tabular-data, and log work: one per family.
+- Each skill description must say to use it at the beginning and again before completion of its task family. Make the trigger concrete enough that an agent can select it from the task instruction alone.
+- The code skill must include a final contract audit for documentation, tests, public-function annotations, and change records when present.
+- The tabular-data skill must include a final contract audit for output schema, metadata, normalized values, and required companion files when present.
+- The log skill must include a final contract audit for JSON schema, metadata, normalized fields, ordering, and aggregate counts when present.
 - Each skill needs YAML frontmatter with a lower-case hyphenated name and a one-sentence description saying when to use it.
-- Give concise imperative checklist instructions after the frontmatter.
+- Keep each imperative checklist under 15 lines and prefer verification steps over long procedural explanations.
 - Output every skill exactly in this format:
 === SKILL: <name> ===
 ---
