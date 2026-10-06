@@ -99,41 +99,8 @@ def parse_duration(text):
         raise ValueError(f"bad duration: {text!r}")
     return int(m.group(1)) * 60 + int(m.group(2))
 
-### Tool call: read_file
-{"file_path": "/workspace/tests/test_billing.py"}
-
-### Tool result
-Error: File '/workspace/tests/test_billing.py' not found
-
-### Tool call: ls
-{"path": "/workspace/tests"}
-
-### Tool result
-['/workspace/tests/__pycache__/', '/workspace/tests/test_bookings.py']
-
-### Tool call: read_file
-{"file_path": "/workspace/tests/test_bookings.py", "limit": 40}
-
-### Tool result
-@@ lines 1-15 of 15 @@
-from bookings.billing import billable_blocks
-from bookings.schedule import add_slot, total_minutes
-
-
-def test_total_minutes_mixed_formats():
-    assert total_minutes(["1h30m", "2h"]) == 210
-
-
-def test_billable_blocks_rounds_up():
-    assert billable_blocks(20) == 2
-    assert billable_blocks(45) == 3
-
-
-def test_add_slot_single_call():
-    assert add_slot("a") == ["a"]
-
 ### Tool call: edit_file
-{"file_path": "/workspace/bookings/billing.py", "old_string": "    return round(minutes / block)", "new_string": "    if minutes < 0:\n        raise ValueError(\"minutes must be >= 0\")\n    # round UP to the nearest block\n    return (minutes + block - 1) // block"}
+{"file_path": "/workspace/bookings/billing.py", "old_string": "    return round(minutes / block)", "new_string": "    if minutes < 0:\n        raise ValueError(\"minutes must be >= 0\")\n    # round UP to the next block\n    return (minutes + block - 1) // block"}
 
 ### Tool result
 Successfully replaced 1 instance(s) of the string in '/workspace/bookings/billing.py'
@@ -151,12 +118,12 @@ Successfully replaced 1 instance(s) of the string in '/workspace/bookings/schedu
 Successfully replaced 1 instance(s) of the string in '/workspace/bookings/timeutil.py'
 
 ### Assistant
-I fixed the following issues in the source code to make the test suite pass and to comply with the docstring specifications:
+I fixed the following issues in the source code to make the test suite pass and ensure the functions behave as their docstrings specify:
 
-1. In bookings/billing.py, I changed the billable_blocks function to raise a ValueError if minutes is negative and to always round up the number of blocks instead of using round().
+1. In bookings/billing.py, the billable_blocks function was using round() which rounds to the nearest integer. I changed it to always round up partial blocks by using integer division with adjustment. Also added a check to raise ValueError if minutes is negative.
 
-2. In bookings/schedule.py, I fixed the add_slot function to avoid using a mutable default argument. It now uses None as the default and creates a new list inside the function, ensuring separate calls do not share state.
+2. In bookings/schedule.py, the add_slot function used a mutable default argument (slots=[]), which caused shared state between calls. I changed the default to None and created a new list inside the function to avoid shared state.
 
-3. In bookings/timeutil.py, I fixed the parse_duration function to support all the duration formats described in the docstring, including "1h", "45m", "1:30", and bare numbers. It now tries matching each format in turn and raises ValueError only if none match.
+3. In bookings/timeutil.py, the parse_duration function only supported the "XhYm" format and raised ValueError otherwise. I extended it to support all the formats described in the docstring ("XhYm", "Xh", "Ym", "H:M", and bare minutes) by adding multiple regex matches in sequence.
 
-These changes ensure the functions behave as documented and pass the existing tests.
+These changes align the code with the specifications in the docstrings and fix the test failures. No tests or other files were modified.
