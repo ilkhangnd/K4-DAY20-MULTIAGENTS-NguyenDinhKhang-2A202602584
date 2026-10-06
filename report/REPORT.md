@@ -27,9 +27,9 @@ Minh chứng tái lập được là các artifact máy sinh. Các điểm đố
 
 ## 2. Giả thuyết (commit TRƯỚC tag `freeze`, Phần 4.0)
 
-- H1 (subagents so với baseline): Dự đoán `subagents` không tăng điểm trung bình trên evaluation so với `baseline`, nhưng tăng token. Ở task học, nó đạt 8/27 so với 13/27 của baseline và dùng 126,769 so với 103,304 token; chỉ một trong ba task có lời gọi subagent, nên chi phí điều phối chưa tạo được lợi ích nhất quán.
-- H2 (skills-auto so với baseline): Dự đoán `skills-auto` không cải thiện đáng kể evaluation so với `baseline`. Trên task học, hai điều kiện đều đạt 13/27, trong khi cả ba lượt `skills-auto` đều có `skills_read = 0`; vì vậy skill được nạp nhưng chưa có bằng chứng là đã đi vào ngữ cảnh thực thi. Điều này phù hợp với lưu ý trong GUIDE rằng skill tự sinh có thể không chuyển giao sang tác vụ mới.
-- H3 (tác vụ học so với tác vụ đánh giá): Dự đoán điểm evaluation có thể khác và có độ dao động lớn so với task học, vì mỗi task/cấu hình chỉ chạy một lần và evaluation chứa những yêu cầu mới. Do đó không suy diễn hiệu quả tổng quát chỉ từ điểm học; sẽ tách check kỹ thuật và check quy ước trong phân tích sau freeze.
+- H1 (subagents so với baseline): Dự đoán `subagents` không vượt `baseline` một cách nhất quán ở evaluation. Ở task học, subagents đạt 9/27 so với 12/27 của baseline, dùng trung bình 37,247 so với 35,209 token và chỉ gọi subagent ở data task; vì vậy chi phí điều phối chưa tạo lợi ích rõ rệt.
+- H2 (skills-auto so với baseline): Dự đoán `skills-auto` cải thiện các check quy ước tổ chức hơn là logic kỹ thuật, nhưng tốn nhiều token hơn. Ba skill mới nhắc trực tiếp annotation, regression test/changelog, metadata/CSV và JSON log; lần chạy phát triển đã cho thấy skill được đọc, dù có một lượt code chạm recursion limit.
+- H3 (tác vụ học so với tác vụ đánh giá): Dự đoán kết quả evaluation dao động so với task học vì dữ liệu và house rule mới khác nhau. Mỗi tổ hợp chỉ chạy một lần, nên sẽ phân tích riêng check kỹ thuật, check quy ước và token thay vì suy diễn khả năng tổng quát từ điểm trung bình đơn lẻ.
 
 ## 3. Làm quen Deep Agents (Phần 0.3)
 
