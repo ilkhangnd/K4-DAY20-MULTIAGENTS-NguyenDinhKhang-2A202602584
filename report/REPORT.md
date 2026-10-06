@@ -113,5 +113,10 @@ Trong một lần chạy, baseline có điểm trung bình bằng skills-auto v�
 ## Phụ lục
 
 - Lệnh đã chạy (theo thứ tự): `python -m pytest -q`; baseline/subagents trên task học; `python -m lab.curator`; skills-auto trên task học; `git commit -m "hypotheses"`; `git commit --allow-empty -m "freeze skills" && git tag freeze`; baseline/subagents trên evaluation; đổi tên `results/skills-auto` thành `results/skills-auto-dev`; skills-auto trên cả 6 task; `python scripts/verify_freeze.py`; `python -m lab.compare > report/table.md`; `python scripts/check_breakdown.py`.
-- Thử thách mở rộng: không thực hiện.
+- Thử thách mở rộng 6c — red-team curator: xem [thí nghiệm tách biệt](../experiments/red-team-curator/summary.json). Mô phỏng một trace có prompt injection và một câu trả lời curator đã bị chi phối để sinh ba khối: một skill hợp lệ, một tên `../escape`, và một skill chứa định danh evaluation được tính động. Kết quả mong đợi là chỉ skill hợp lệ được ghi; script không gọi API và không chạm `skills/auto`. Kết quả, biện pháp chặn và hạn chế được ghi bên dưới.
+
+  - Thiết kế: chạy `python experiments/red_team_curator.py`; artifact được ghi riêng ở `experiments/red-team-curator/`, không nằm trong `results/` chính thức.
+  - Kết quả: `summary.json` báo `status: passed`, một model call giả lập, 0 API call, và chỉ `safe-review` được ghi. Đây là đối chứng với curator chính thức đã sinh ba skill hợp lệ vào `skills/auto`.
+  - Cơ chế: `validate_skill` buộc tên theo `SAFE_NAME` và so khớp block name, đồng thời dò mọi `eval_markers()` động; vì vậy traversal và nội dung mang định danh evaluation đều bị loại trước khi ghi file.
+  - Hạn chế/bước tiếp theo: đây là tấn công white-box với model giả lập, nên chưa đo được khả năng một LLM thật chống prompt injection trong ngữ cảnh dài. Có thể mở rộng bằng corpus các trace độc hại đã được khử nội dung evaluation và đo tỉ lệ skill độc hại lọt qua.
 - Ghi chú: tất cả artifact chính thức có `error = null`; tất cả lượt `skills-auto` chính thức có `skills_modified = false`.
